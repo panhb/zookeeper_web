@@ -3,9 +3,65 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript">
+      $(function(){
+        $("#connect").click(function(){
+          var ip=$("#ip").val();
+          if(ip === null || ip === ''){
+            alert('请输入ip地址');
+            return;
+          }
+          var port=$("#port").val();
+          if(port === null || port === ''){
+            alert('请输入端口号');
+            return;
+          }
+          var re =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+          if(!isIp(ip)){
+            alert('请输入正确的ip地址');
+            return;
+          }
+          if(!isPort(port)){
+            alert('请输入正确的端口号');
+            return;
+          }
+          $.ajax({
+            url:"/testConnect",
+            data:{ip:ip,port:port},
+            success:function(data){
+              if(data.success){
+                alert('连接成功');
+                window.location.href="/main?ip="+ip+"&port="+port;
+              }else{
+                alert('连接失败');
+              }
+            }
+          }) 
+        });
+      });
+      
+      function isIp(ip){
+        var re =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+        return re.test(ip);
+      }
+      
+      function isPort(port){
+        var parten=/^(\d)+$/g;  
+        if(parten.test(port)&&parseInt(port)<=65535&&parseInt(port)>=0){  
+            return true;  
+        }else{  
+            return false;  
+        }
+      }
+    </script>
   </head>
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    
+    <input id="ip" type="text" value="" placeholder="ip"/>
+    <input id="port" type="text" value="" placeholder="port"/>
+    <input id="connect" type="button" value="connect" />
   </body>
 </html>

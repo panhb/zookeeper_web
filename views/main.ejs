@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>zookeeper</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="/stylesheets/demo.css" type="text/css">
+	<link rel="stylesheet" href="/stylesheets/metroStyle/metroStyle.css" type="text/css">
+	<script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="/javascripts/jquery.ztree.core-3.5.js"></script>
+	<script type="text/javascript">
+		var setting = {
+			async: {
+				enable: true,
+				url:"connect/<%= ip %>:<%= port %>",
+				autoParam:["id", "name", "level","path"],
+				dataFilter: filter
+			},
+			callback: {
+				onClick: zTreeOnClick
+			}
+		};
+		
+		function zTreeOnClick(event, treeId, treeNode) {
+			$("#name").val(treeNode.name);
+			$("#data").val(treeNode.data);
+		};
+
+		function filter(treeId, parentNode, childNodes) {
+			if (!childNodes) return null;
+			for (var i=0, l=childNodes.length; i<l; i++) {
+				childNodes[i].name = childNodes[i].name.replace(/\.n/g, '.');
+			}
+			return childNodes;
+		}
+
+		$(document).ready(function(){
+			$.fn.zTree.init($("#treeDemo"), setting);
+		});
+	</script>
+  </head>
+  <body>
+    <ul id="treeDemo" class="ztree"></ul>
+	<input id="name" type="text" readonly value="" style="width:80%;"/>
+	<input id="data" type="text" readonly value="" style="width:80%;"/>
+  </body>
+</html>
