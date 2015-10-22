@@ -11,15 +11,12 @@ router.get('/', function(req, res, next) {
 router.get('/testConnect', function(req, res, next) {
   var ip = req.query.ip;
   var port = req.query.port;
-  console.log(ip)
-  console.log(port)
   var client = zookeeper.createClient(ip+":"+port);
   client.connect();
   var flag = false;
   client.once('connected', function () {
 	  flag = true;
 	  res.send({success:true});
-	  
   });
   setTimeout(function(){if(!flag){res.send({success:false});}},1000);
 });
