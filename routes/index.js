@@ -16,9 +16,17 @@ router.get('/testConnect', function(req, res, next) {
   var flag = false;
   client.once('connected', function () {
 	  flag = true;
-	  res.send({success:true});
+	  try{
+	  	  res.send({success:true});
+	  }catch(e){
+		  console.error(e);
+	  }
   });
-  setTimeout(function(){if(!flag){res.send({success:false});}},1000);
+  try{
+	 setTimeout(function(){if(!flag){res.send({success:false});}},1000);
+  }catch(e){
+	 console.error(e);
+  }
 });
 
 router.get('/main', function(req, res, next) {
