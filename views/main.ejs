@@ -20,7 +20,7 @@
 				onClick: zTreeOnClick
 			}
 		};
-		
+
 		function zTreeOnClick(event, treeId, treeNode) {
 			$("#name").val(treeNode.name);
 			$("#data").val(treeNode.data);
@@ -37,15 +37,113 @@
 		$(document).ready(function(){
 			$.fn.zTree.init($("#treeDemo"), setting);
 		});
+
+		function refreshTree(){
+			var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+			treeObj.reAsyncChildNodes(null, "refresh");
+		}
+		
+		function add(){
+			var path = $("#add_path").val();
+			var data = $("#add_data").val();
+			var create_model = $("#create_model").val();
+			if(!verify(path)){
+				return;
+			}
+			$.ajax({
+				url:"add/<%= ip %>:<%= port %>",
+				data:{path:path,data:data,create_model:create_model},
+				dataType:"json",
+				success:function(data){
+					alert(data.message);
+					if(data.success){
+						refreshTree();
+					}
+				}
+			});
+		}
+
+		function del(){
+			var path = $("#del_path").val();
+			if(!verify(path)){
+				return;
+			}
+			$.ajax({
+				url:"del/<%= ip %>:<%= port %>",
+				data:{path:path},
+				dataType:"json",
+				success:function(data){
+					alert(data.message);
+					if(data.success){
+						refreshTree();
+					}
+				}
+			});
+		}
+
+		function update(){
+			var path = $("#update_path").val();
+			var data = $("#update_data").val();
+			if(!verify(path)){
+				return;
+			}
+			$.ajax({
+				url:"update/<%= ip %>:<%= port %>",
+				data:{path:path,data:data},
+				dataType:"json",
+				success:function(data){
+					alert(data.message);
+					if(data.success){
+						refreshTree();
+					}
+				}
+			});
+		}
+		
+		function verify(path){
+			if(path === null || path ===''){
+				alert('PATH不能为空');
+				return false;
+			}
+			if(path.substring(0,1) !== '/'){
+				alert('PATH不合法');
+				return false;
+			}
+			return true;
+		}
 	</script>
   </head>
   <body>
   	<div style="float:left;width:50%;height:80%;margin-left:2%;">
-    <ul id="treeDemo" class="ztree" style="width:90%;height:100%;"></ul>
+    	<ul id="treeDemo" class="ztree" style="width:90%;height:100%;"></ul>
 	</div>
 	<div style="float:left;width:40%;position:fixed;left:55%;">
-	<input id="name" type="text"  value="" style="width:90%;margin-top:2%;"/>
-	<input id="data" type="text"  value="" style="width:90%;margin-top:5%;"/>
+		<textarea id="name" rows="5" style="width:90%;margin-top:2%;"></textarea>
+		<textarea id="data" rows="3" style="width:90%;margin-top:4%;"></textarea>
+		<hr style="margin-left:0%;width:91%;"/>
+		<span style="width:90%;margin-top:9%;font-weight:bold;">新增节点</span>
+		<input id="add_path" placeholder="PATH" style="width:90%;margin-top:2%;"></input>
+		<input id="add_data" placeholder="DATA" style="width:90%;margin-top:4%;"></input>
+		<br/><br/>
+		<select id="create_model">
+		<option value="0">PERSISTENT</option>
+		<option value="1">EPHEMERAL</option>
+		<option value="2">PERSISTENT_SEQUENTIAL</option>
+		<option value="3">EPHEMERAL_SEQUENTIAL</option>
+		</select>
+		<br/><br/>
+		<button onclick="javascript:add();">新增</button>
+		<hr style="margin-left:0%;width:91%;"/>
+		<span style="width:90%;margin-top:9%;font-weight:bold;">删除节点</span>
+		<input id="del_path" placeholder="PATH" style="width:90%;margin-top:2%;"></input>
+		<br/><br/>
+		<button onclick="javascript:del();">删除</button>
+		<hr style="margin-left:0%;width:91%;"/>
+		<span style="width:90%;margin-top:9%;font-weight:bold;">更新节点</span>
+		<input id="update_path" placeholder="PATH" style="width:90%;margin-top:2%;"></input>
+		<input id="update_data" placeholder="DATA" style="width:90%;margin-top:4%;"></input>
+		<br/><br/>
+		<button onclick="javascript:update();">更新</button>
 	</div>
   </body>
 </html>
