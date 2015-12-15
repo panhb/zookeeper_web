@@ -6,6 +6,19 @@
     <script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js"></script>
     <script type="text/javascript">
       $(function(){
+      
+        $("#ip").keyup(function(event){
+          if(event.keyCode ==13){
+            $("#connect").trigger("click");
+          }
+        });
+        
+        $("#port").keyup(function(event){
+          if(event.keyCode ==13){
+            $("#connect").trigger("click");
+          }
+        });
+        
         $("#connect").click(function(){
           var ip=$("#ip").val();
           if(ip === null || ip === ''){
