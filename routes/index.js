@@ -167,26 +167,28 @@ function listChildren(res,client, path,pid) {
 			client.getChildren(new_path,function (error, children, stat) {
 				if (error) {
 					callback(error);
-				}
-				if(children === null || children.length === 0 ){
-					client.getData(new_path,function (error, data, stat) {
-						if (error) {
-							console.log(error.stack);
-							return;
-						}
-						if(typeof data === 'undefined'){
-							callback(null,{'name':child,'isParent':false,data:'',pid:pid,id:id,path:path});
-						}else{
-							callback(null,{'name':child,'isParent':false,data:data.toString('utf8'),pid:pid,id:id,path:path});
-						}
-					});
 				}else{
-					callback(null,{'name':child,'isParent':true,pid:pid,id:id,path:path});
+					if(children === null || children.length === 0 ){
+						client.getData(new_path,function (error, data, stat) {
+							if (error) {
+								console.log(error.stack);
+								return;
+							}
+							if(typeof data === 'undefined'){
+								callback(null,{'name':child,'isParent':false,data:'',pid:pid,id:id,path:path});
+							}else{
+								callback(null,{'name':child,'isParent':false,data:data.toString('utf8'),pid:pid,id:id,path:path});
+							}
+						});
+					}else{
+						callback(null,{'name':child,'isParent':true,pid:pid,id:id,path:path});
+					}
 				}
 			});
 		},function(errs,results){
 			if(errs){
 				console.log(errs);
+				res.send(errs);
 			}else{
 				if(path === '/'){
 					var obj = {};
