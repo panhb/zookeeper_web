@@ -197,6 +197,27 @@ function listChildren(res,client, path,pid) {
 					obj.children = results;
 					res.send(obj);
 				}else{
+					//节点按ascii码排序
+					results.sort(function(a,b){
+						var a1 = a.name.split('.');
+						var b1 = b.name.split('.');
+						var len1 = a1.length < b1.length ? a1.length:b1.length;
+						for(var i = 0 ; i < len1; i++){
+							if(a1[i] == b1[i])
+								continue;
+							var a2 = a1[i].split('');
+							var b2 = b1[i].split('');
+							var len2 = a2.length < b2.length ? a2.length:b2.length;
+							for(var j = 0 ; j < len2; j++){
+								if(a2[j].charCodeAt()  > b2[j].charCodeAt())
+									return 1;
+								else if(a2[j].charCodeAt()  < b2[j].charCodeAt())
+									return -1;
+								if(j == len2-1)
+									return 1;
+							}
+						}	
+					});
 					res.send(results);
 				}
 				
