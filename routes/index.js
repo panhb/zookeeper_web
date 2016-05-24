@@ -73,6 +73,7 @@ router.get('/del/:address', function(req, res, next) {
   var obj = {};
   var client = zookeeper.createClient(address,{ sessionTimeout: 50000 });
   client.connect();
+  /*
   client.remove(
 	path,
 	function (error) {
@@ -93,7 +94,26 @@ router.get('/del/:address', function(req, res, next) {
 		res.send(obj);
 	}
   );
+  */
+  delNode(path,client);
+  setTimeout(function(){res.send({success:true,message:'Node delete success.'})},1000);
 });
+
+function delNode(path,client){
+	client.getChildren(path,function (error, children, stat) {
+		if (error || children === null || children.length === 0 ) {
+			client.remove(path,function (error) {
+				console.log('Node delete success.Path is '+path);
+			});
+		}else{
+			for(var child in children){
+				var npath = path+'/'+children[child];
+				delNode(npath,client);
+			}
+			delNode(path,client);
+		}
+	});
+}
 
 router.get('/update/:address', function(req, res, next) {
   var address = req.params.address;
