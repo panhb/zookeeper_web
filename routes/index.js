@@ -3,6 +3,8 @@ var zookeeper = require('node-zookeeper-client');
 var async = require('async');
 var router = express.Router();
 
+var client = null;
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'zookeeper_web' });
@@ -11,12 +13,13 @@ router.get('/', function(req, res, next) {
 router.get('/testConnect', function(req, res, next) {
   var ip = req.query.ip;
   var port = req.query.port;
-  var client = zookeeper.createClient(ip+":"+port,{ sessionTimeout: 50000 });
-  client.connect();
+  var tclient = zookeeper.createClient(ip+":"+port,{ sessionTimeout: 50000 });
+  tclient.connect();
   var flag = false;
-  client.once('connected', function () {
+  tclient.once('connected', function () {
 	  flag = true;
 	  try{
+		  tclient.close();
 	  	  res.send({success:true});
 	  }catch(e){
 		  console.error(e);
@@ -32,6 +35,7 @@ router.get('/testConnect', function(req, res, next) {
 router.get('/main', function(req, res, next) {
   var ip = req.query.ip;
   var port = req.query.port;
+  initClient(ip+":"+port);
   res.render('main', { ip: ip, port:port});
 });
 
@@ -41,9 +45,8 @@ router.get('/add/:address', function(req, res, next) {
   var data = req.query.data;
   var create_model = req.query.create_model;
   var obj = {};
-  var client = zookeeper.createClient(address,{ sessionTimeout: 50000 });
-  client.connect();
-  client.create(
+  initClient(address);
+  client.mkdirp(
 	path,
 	new Buffer(data),
 	create_model,
@@ -71,30 +74,7 @@ router.get('/del/:address', function(req, res, next) {
   var address = req.params.address;
   var path = req.query.path;
   var obj = {};
-  var client = zookeeper.createClient(address,{ sessionTimeout: 50000 });
-  client.connect();
-  /*
-  client.remove(
-	path,
-	function (error) {
-		if (error) {
-			obj.success = false;
-			if (error.getCode() == zookeeper.Exception.NO_NODE) {
-				obj.message = 'No node.';
-				console.log('No node.Path is '+path);
-			} else {
-				console.log(error.stack);
-				obj.message = error.stack;
-			}
-		}else{
-			obj.success = true;
-			obj.message = 'Node delete success.';
-			console.log('Node delete success.Path is '+path);
-		}
-		res.send(obj);
-	}
-  );
-  */
+  initClient(address);
   delNode(path,client);
   setTimeout(function(){res.send({success:true,message:'Node delete success.'})},1000);
 });
@@ -115,13 +95,18 @@ function delNode(path,client){
 	});
 }
 
+function initClient(address){
+	client = zookeeper.createClient(address,{ sessionTimeout: 5000 });
+    client.connect();
+	return client;
+}
+
 router.get('/update/:address', function(req, res, next) {
   var address = req.params.address;
   var path = req.query.path;
   var data = req.query.data;
   var obj = {};
-  var client = zookeeper.createClient(address,{ sessionTimeout: 50000 });
-  client.connect();
+  initClient(address);
   client.setData(
 	path,
 	new Buffer(data),
@@ -150,10 +135,8 @@ router.post('/connect/:address', function(req, res, next) {
   var id = req.body.id;
   var name = req.body.name;
   var path = req.body.path;
-  
-  var client = zookeeper.createClient(address,{ sessionTimeout: 50000 });
-  client.connect();
-  client.once('connected', function () {
+  initClient(address);
+  client.once('connected', function (err) {
 	if(typeof id === 'undefined'){
 		listChildren(res,client,'/','1');
 	}else{
